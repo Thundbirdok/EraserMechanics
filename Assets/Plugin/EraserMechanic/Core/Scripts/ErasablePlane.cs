@@ -9,7 +9,7 @@ namespace Plugin.EraserMechanic.Core.Scripts
         public event Action OnInited;
         
         public bool IsInited { get; private set; }
-        
+
         public Texture2D ErasedTexture => eraser.ErasedTexture;
         
         [SerializeField]
@@ -17,7 +17,7 @@ namespace Plugin.EraserMechanic.Core.Scripts
 
         [SerializeField]
         private Pointer pointer;
-        
+
         private void OnEnable()
         {
             Init();
@@ -43,14 +43,18 @@ namespace Plugin.EraserMechanic.Core.Scripts
             OnInited?.Invoke();
         }
 
-        private void OnMouseOver()
-        {
-            pointer.CheckPointerPosition();
-        }
-
         private void Erase()
         {
             var localPoint = transform.InverseTransformPoint(pointer.PointerPosition);
+            
+            if (pointer.IsPointedLastFrame)
+            {
+                var lastLocalPoint = transform.InverseTransformPoint(pointer.LastPointerPosition);
+
+                eraser.EraseLine(lastLocalPoint, localPoint);
+                
+                return;
+            }
             
             eraser.EraseInPoint(localPoint);
         }

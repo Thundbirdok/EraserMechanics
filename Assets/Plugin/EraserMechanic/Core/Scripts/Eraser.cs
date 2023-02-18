@@ -6,10 +6,6 @@ namespace Plugin.EraserMechanic.Core.Scripts
     [Serializable]
     public sealed class Eraser
     {
-        public event Action OnInited;
-        
-        public bool IsInited { get; private set; } = false;
-        
         public Texture2D ErasedTexture { get; private set; }
 
         [SerializeField]
@@ -21,9 +17,13 @@ namespace Plugin.EraserMechanic.Core.Scripts
         [SerializeField]
         private int brushRadius = 5;
 
+        private bool _isInited;
+
+        private Color[] _pixels;
+        
         public void Init()
         {
-            if (IsInited)
+            if (_isInited)
             {
                 return;
             }
@@ -36,56 +36,96 @@ namespace Plugin.EraserMechanic.Core.Scripts
                 true
             );
 
-            var pixels = erasedTextureSample.GetPixels();
-            ErasedTexture.SetPixels(pixels);
-
-            ErasedTexture.Apply();
+            _pixels = erasedTextureSample.GetPixels();
             
-            IsInited = true;
-            OnInited?.Invoke();
+            Apply();
+            
+            _isInited = true;
         }
         
         public void EraseInPoint(Vector2 point)
         {
-            var x = Mathf.FloorToInt(point.x * ErasedTexture.width + (float)ErasedTexture.width / 2);
-            var y = Mathf.FloorToInt(point.y * ErasedTexture.height + (float)ErasedTexture.height / 2);
+            GetPointInPixels(point, out var x, out var y);
+
+            EraseInPixel(x, y);
             
-            var pointInPixels = new Vector2Int(x, y);
+            ErasedTexture.SetPixels(_pixels);
             
-            EraseInPixel(pointInPixels);
+            ErasedTexture.Apply();
         }
-        
-        public void EraseInPixel(Vector2Int pointInPixels)
+
+        public void EraseLine(Vector2 pointA, Vector2 pointB)
+        {
+            GetPointInPixels(pointA, out var xA, out var yA);
+            GetPointInPixels(pointB, out var xB, out var yB);
+
+            var xDistance = xB - xA;
+            var yDistance = yB - yA;
+
+            var distance = Mathf.Sqrt(xDistance * xDistance + yDistance * yDistance);
+
+            if (distance == 0)
+            {
+                EraseInPixel(xA, yA);
+
+                Apply();
+            }
+
+            for (var i = 1; i <= distance; ++i)
+            {
+                var t = i / distance;
+
+                var x = Mathf.FloorToInt(xA + xDistance * t);
+                var y = Mathf.FloorToInt(yA + yDistance * t);
+                
+                EraseInPixel(x, y);
+            }
+
+            Apply();
+        }
+
+        private void EraseInPixel(int x, int y)
         {
             for (int i = -brushRadius; i < brushRadius; ++i)
             {
                 for (int j = -brushRadius; j < brushRadius; ++j)
                 {
-                    var dist = Mathf.Sqrt(i * i + j * j);
+                    var distance = Mathf.Sqrt(i * i + j * j);
                     
-                    if (dist <= brushRadius)
+                    if (distance <= brushRadius)
                     {
-                        ErasePixel(pointInPixels + new Vector2Int(j, i));
+                        ErasePixel(x + j, y + i);
                     }
                 }
             }
-            
-            ErasedTexture.Apply();
         }
-        
-        private void ErasePixel(Vector2Int point)
+
+        private void GetPointInPixels(Vector2 point, out int x, out int y)
         {
-            if (point.x > ErasedTexture.width || point.x < 0)
+            x = Mathf.FloorToInt(point.x * ErasedTexture.width + (float)ErasedTexture.width / 2);
+            y = Mathf.FloorToInt(point.y * ErasedTexture.height + (float)ErasedTexture.height / 2);
+        }
+
+        private void ErasePixel(int x, int y)
+        {
+            if (x > ErasedTexture.width || x < 0)
             {
                 return;
             }
             
-            if (point.y > ErasedTexture.height || point.y < 0)
+            if (y > ErasedTexture.height || y < 0)
             {
                 return;
             }
-            
-            ErasedTexture.SetPixel(point.x, point.y, eraseColor);
+
+            _pixels[y * ErasedTexture.width + x] = eraseColor;
+        }
+
+        private void Apply()
+        {
+            ErasedTexture.SetPixels(_pixels);
+
+            ErasedTexture.Apply();
         }
     }
 }
