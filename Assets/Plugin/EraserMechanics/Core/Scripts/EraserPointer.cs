@@ -1,11 +1,10 @@
-using System;
-using UnityEngine;
-
-namespace Plugin.EraserMechanic.Core.Scripts
+namespace Plugin.EraserMechanics.Core.Scripts
 {
+    using System;
+    using UnityEngine;
     using UnityEngine.EventSystems;
-    
-    public sealed class Pointer : MonoBehaviour
+
+    public sealed class EraserPointer : MonoBehaviour
     {
         public event Action OnChangedPointerPosition;
 

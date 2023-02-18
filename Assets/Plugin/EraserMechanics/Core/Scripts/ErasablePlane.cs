@@ -1,8 +1,8 @@
-using UnityEngine;
-
-namespace Plugin.EraserMechanic.Core.Scripts
+namespace Plugin.EraserMechanics.Core.Scripts
 {
     using System;
+    using UnityEngine;
+    using UnityEngine.Serialization;
 
     public sealed class ErasablePlane : MonoBehaviour
     {
@@ -15,19 +15,19 @@ namespace Plugin.EraserMechanic.Core.Scripts
         [SerializeField]
         private Eraser eraser;
 
-        [SerializeField]
-        private Pointer pointer;
+        [FormerlySerializedAs("pointer")] [SerializeField]
+        private EraserPointer eraserPointer;
 
         private void OnEnable()
         {
             Init();
 
-            pointer.OnChangedPointerPosition += Erase;
+            eraserPointer.OnChangedPointerPosition += Erase;
         }
 
         private void OnDisable()
         {
-            pointer.OnChangedPointerPosition -= Erase;
+            eraserPointer.OnChangedPointerPosition -= Erase;
         }
 
         private void Init()
@@ -45,11 +45,11 @@ namespace Plugin.EraserMechanic.Core.Scripts
 
         private void Erase()
         {
-            var localPoint = transform.InverseTransformPoint(pointer.PointerPosition);
+            var localPoint = transform.InverseTransformPoint(eraserPointer.PointerPosition);
             
-            if (pointer.IsPointedLastFrame)
+            if (eraserPointer.IsPointedLastFrame)
             {
-                var lastLocalPoint = transform.InverseTransformPoint(pointer.LastPointerPosition);
+                var lastLocalPoint = transform.InverseTransformPoint(eraserPointer.LastPointerPosition);
 
                 eraser.EraseLine(lastLocalPoint, localPoint);
                 

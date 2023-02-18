@@ -1,8 +1,7 @@
-using UnityEngine;
-
-namespace Plugin.EraserMechanic.Example.Scripts
+namespace Plugin.EraserMechanics.Example.Scripts
 {
-    using Plugin.EraserMechanic.Core.Scripts;
+    using Plugin.EraserMechanics.Core.Scripts;
+    using UnityEngine;
 
     public sealed class TextureSetterForSpriteRenderer : MonoBehaviour
     {
