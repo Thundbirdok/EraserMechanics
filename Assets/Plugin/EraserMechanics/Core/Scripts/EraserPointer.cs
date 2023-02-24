@@ -1,9 +1,11 @@
 namespace Plugin.EraserMechanics.Core.Scripts
 {
     using System;
+    using Unity.Burst;
     using UnityEngine;
     using UnityEngine.EventSystems;
 
+    [BurstCompile]
     public sealed class EraserPointer : MonoBehaviour
     {
         public event Action OnChangedPointerPosition;
@@ -50,6 +52,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             IsPointedLastFrame = true;
         }
         
+        [BurstCompile]
         private bool TryGetPointerPosition()
         {
             if (Input.GetMouseButton(0) == false)
@@ -65,6 +68,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             return Raycast();
         }
 
+        [BurstCompile]
         private bool Raycast()
         {
             var ray = raycastCamera.ScreenPointToRay(Input.mousePosition);
@@ -79,6 +83,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             return GetHits(size);
         }
         
+        [BurstCompile]
         private bool GetHits(in int size)
         {
             for (var i = 0; i < size; ++i)

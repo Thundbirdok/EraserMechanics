@@ -1,8 +1,10 @@
 namespace Plugin.EraserMechanics.Core.Scripts
 {
     using System;
+    using Unity.Burst;
     using UnityEngine;
 
+    [BurstCompile]
     [Serializable]
     public sealed class Eraser
     {
@@ -21,6 +23,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
 
         private Color[] _pixels;
         
+        [BurstCompile]
         public void Init()
         {
             if (_isInited)
@@ -43,6 +46,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             _isInited = true;
         }
         
+        [BurstCompile]
         public void EraseInPoint(Vector2 point)
         {
             GetPointInPixels(point, out var x, out var y);
@@ -54,6 +58,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             ErasedTexture.Apply();
         }
 
+        [BurstCompile]
         public void EraseLine(Vector2 pointA, Vector2 pointB)
         {
             GetPointInPixels(pointA, out var xA, out var yA);
@@ -84,6 +89,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             Apply();
         }
 
+        [BurstCompile]
         private void EraseInPixel(int x, int y)
         {
             for (int i = -brushRadius; i < brushRadius; ++i)
@@ -100,20 +106,22 @@ namespace Plugin.EraserMechanics.Core.Scripts
             }
         }
 
+        [BurstCompile]
         private void GetPointInPixels(Vector2 point, out int x, out int y)
         {
             x = Mathf.FloorToInt(point.x * ErasedTexture.width + (float)ErasedTexture.width / 2);
             y = Mathf.FloorToInt(point.y * ErasedTexture.height + (float)ErasedTexture.height / 2);
         }
 
+        [BurstCompile]
         private void ErasePixel(int x, int y)
         {
-            if (x > ErasedTexture.width || x < 0)
+            if (x >= ErasedTexture.width || x < 0)
             {
                 return;
             }
             
-            if (y > ErasedTexture.height || y < 0)
+            if (y >= ErasedTexture.height || y < 0)
             {
                 return;
             }
@@ -121,6 +129,7 @@ namespace Plugin.EraserMechanics.Core.Scripts
             _pixels[y * ErasedTexture.width + x] = eraseColor;
         }
 
+        [BurstCompile]
         private void Apply()
         {
             ErasedTexture.SetPixels(_pixels);
